@@ -2,7 +2,7 @@
   Project description
   
 ## Afectiva Sample Code 
-This is a sample web app making use of Affectiva Java SDK.Some of the codes here are borrowed from Affectiva's github. I modified some dependencies to run it locally. In the future, our team will develop more features and intergrate this module into our main app.
+This is a sample web app making use of Affectiva Java SDK. Some of the codes here are borrowed from Affectiva's github. I modified some dependencies to run it locally. In the future, our team will develop more features and intergrate this module into our main app.
 
 ## Instruction
 
