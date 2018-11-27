@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-import os, socketserver, sys, threading
+import os, signal, socketserver, sys, threading, time
 
 _ids = {}
 _lock = threading.Lock()
@@ -8,13 +8,16 @@ _wt = None
 _ff = 'ffmpeg -i {pipe_in} -vf fps="fps=1/3" {pipe_face_in} -r 30 {pipe_lip_in}'
 # NOTE _lp may need to be replaced: 'LipNet/evaluation/predict.py ...'
 _lp = 'LipNet/predict {_wt} {pipe_lip_in} | tee {pipe_txt_out} {pipe_voice_in}'
+_addr = ('localhost', 2121)
+_full_stop = threading.Event() # tell all threads to finish up when set
 
-def handle_connections(address=('localhost', 2121), weights_path)
+def handle_connections(address=_addr, weights_path)
   _wt = weights_path
   try:
     srv = socketserver.ThreadingTCPServer(address, Handler)
     ip, port = srv.server_address
     srv_thread = threading.Thread(target=srv.serve_forever)
+    _full_stop.unset()
     srv_thread.start()
   except:
     stop(srv)
@@ -145,3 +148,22 @@ def lip(lip_in, text_out, voice_in):
 # TODO merge words and emotions into SSML, pass to Polly
 def voice(voice_in, face_out, voice_out):
   pass
+
+
+
+if __name__ == '__main__':
+  l = len(sys.argv)
+  if l < 2 or l == 3:
+    print('Usage: glue.py <weights_path> [ip_address port]')
+  else:
+    signal.signal(signal.SIGHUP, lambda sig, frame: print('ignoring hangup'))
+    path = sys.argv[1]
+    addr = (sys.argv[2], sys.argv[3]) if l > 2 else ('localhost', 2121)
+    srv = handle_connections(path, addr)
+    while True:
+      try:
+        time.sleep(3600)
+      except KeyboardInterrupt:
+        _full_stop.set()
+        break
+    srv.shutdown()
