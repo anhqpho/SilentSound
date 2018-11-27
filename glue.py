@@ -11,13 +11,13 @@ _lp = 'LipNet/predict {_wt} {pipe_lip_in} | tee {pipe_txt_out} {pipe_voice_in}'
 _addr = ('localhost', 2121)
 _full_stop = threading.Event() # tell all threads to finish up when set
 
-def handle_connections(address=_addr, weights_path)
+def handle_connections(weights_path, address=_addr):
   _wt = weights_path
   try:
     srv = socketserver.ThreadingTCPServer(address, Handler)
     ip, port = srv.server_address
     srv_thread = threading.Thread(target=srv.serve_forever)
-    _full_stop.unset()
+    _full_stop.clear()
     srv_thread.start()
   except:
     stop(srv)
@@ -25,7 +25,7 @@ def handle_connections(address=_addr, weights_path)
   else:
     return srv
 
-def stop(srv: serversocket.ThreadingTCPServer):
+def stop(srv: socketserver.ThreadingTCPServer):
   srv.shutdown()
   srv.close()
 
@@ -157,9 +157,9 @@ if __name__ == '__main__':
     print('Usage: glue.py <weights_path> [ip_address port]')
   else:
     signal.signal(signal.SIGHUP, lambda sig, frame: print('ignoring hangup'))
-    path = sys.argv[1]
+    w_path = sys.argv[1]
     addr = (sys.argv[2], sys.argv[3]) if l > 2 else ('localhost', 2121)
-    srv = handle_connections(path, addr)
+    srv = handle_connections(w_path, addr)
     while True:
       try:
         time.sleep(3600)
