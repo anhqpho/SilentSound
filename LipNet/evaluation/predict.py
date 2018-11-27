@@ -34,7 +34,6 @@ def predict(weight_path, video_path, absolute_max_string_len=32, output_size=28)
     else:
         frames_n, img_w, img_h, img_c = video.data.shape
 
-
     lipnet = LipNet(img_c=img_c, img_w=img_w, img_h=img_h, frames_n=frames_n,
                     absolute_max_string_len=absolute_max_string_len, output_size=output_size)
 
@@ -56,6 +55,7 @@ def predict(weight_path, video_path, absolute_max_string_len=32, output_size=28)
     return (video, result)
 
 if __name__ == '__main__':
+    print("I'm OK'")
     if len(sys.argv) == 3:
         video, result = predict(sys.argv[1], sys.argv[2])
     elif len(sys.argv) == 4:

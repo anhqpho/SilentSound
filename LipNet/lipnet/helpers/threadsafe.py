@@ -11,9 +11,9 @@ class threadsafe_iter:
     def __iter__(self):
         return self
 
-    def __next__(self):
+    def next(self):
         with self.lock:
-            return next(self.it)
+            return self.it.next()
 
 
 def threadsafe_generator(f):
