@@ -147,10 +147,25 @@ def lip(lip_in, text_out, voice_in):
     # TODO timestamping?
     os.system(_lp.format(_wt, pipe_lip_in, pipe_txt_out, pipe_voice_in))
 
-# TODO merge words and emotions into SSML, pass to Polly
+# convert words and emotions to speech
+# voice_in and face_out take text (words and emotions, respectively)
+# voice_out takes an audio stream
+# terminates after both voice_in and face_out streams close (EOF)
 def voice(voice_in, face_out, voice_out):
-  pass
-
+  with open(voice_in,'r') as pipe_voice_in, open(face_out,'r') as pipe_face_out, \
+       open(voice_out,'wb') as pipe_voice_out:
+    # TODO read, generate SSML, synthesize voice, write
+    # pseudocode:
+    # while voice_in is open or face_out streams is open:
+      # read 1 line at a time from face_out, 3 seconds' worth from voice_in
+      # build SSML (possibly using pyssml)
+      # if SSML is not consumable and voice_in is closed and face_out is closed:
+        # finish chunk
+      # if SSML is a consumable chunk:
+        # send to Polly
+        # write Polly return value to voice_out
+        # clear SSML
+    pass
 
 
 if __name__ == '__main__':
