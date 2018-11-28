@@ -9,10 +9,12 @@ _ff = 'ffmpeg -i {pipe_in} -vf fps="fps=1/3" {pipe_face_in} -r 30 {pipe_lip_in}'
 # NOTE _lp may need to be replaced: 'LipNet/evaluation/predict.py ...'
 _lp = 'LipNet/predict {_wt} {pipe_lip_in} | tee {pipe_txt_out} {pipe_voice_in}'
 _addr = ('localhost', 2121)
+_tmp = '/tmp'
 _full_stop = threading.Event() # tell all threads to finish up when set
 
-def handle_connections(weights_path, address=_addr):
+def handle_connections(weights_path, address=_addr, fd_dir=_tmp):
   _wt = weights_path
+  _tmp = fd_dir
   try:
     srv = socketserver.ThreadingTCPServer(address, Handler)
     ip, port = srv.server_address
@@ -65,7 +67,7 @@ class Handler(socketserver.StreamRequestHandler):
 
 # create a unique named pipe
 # returns index in _ids
-def make_fifo(path='/tmp'):
+def make_fifo(path=_tmp):
   id = 0
   with _lock:
     while id in _ids:
@@ -77,7 +79,7 @@ def make_fifo(path='/tmp'):
 
 # create arbitrarily many named pipes
 # returns list of indices in _ids
-def make_fifos(count=1, path='/tmp'):
+def make_fifos(count=1, path=_tmp):
   if count == 1:
     return [make_fifo(path)]
   temp = 0
