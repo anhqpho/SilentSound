@@ -10,7 +10,7 @@ fi
 
 if [[ $# -lt 2 ]] ; then
 	echo "Using all available GPUs."
-    python "$SCENARIO_PATH/train.py"
+    python2 "$SCENARIO_PATH/train.py"
     exit 1
 fi
 
