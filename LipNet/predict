@@ -18,17 +18,17 @@ if [[ "$VIDEO_PATH" != /* ]]; then
 fi
 
 if [[ $# -eq 2 ]] ; then
-	python "$DIR/evaluation/predict.py" "$WEIGHT_PATH" "$VIDEO_PATH"
+	python2 "$DIR/evaluation/predict.py" "$WEIGHT_PATH" "$VIDEO_PATH"
     exit 1
 fi
 
 if [[ $# -eq 3 ]] ; then
-	python "$DIR/evaluation/predict.py" "$WEIGHT_PATH" "$VIDEO_PATH" $3
+	python2 "$DIR/evaluation/predict.py" "$WEIGHT_PATH" "$VIDEO_PATH" $3
     exit 1
 fi
 
 if [[ $# -eq 4 ]] ; then
-	python "$DIR/evaluation/predict.py" "$WEIGHT_PATH" "$VIDEO_PATH" $3 $4
+	python2 "$DIR/evaluation/predict.py" "$WEIGHT_PATH" "$VIDEO_PATH" $3 $4
     exit 1
 fi
 
