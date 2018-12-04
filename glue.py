@@ -127,14 +127,13 @@ def mpeg_split(video_in, face_in, lip_in):
 # terminates after done is set
 def emotion(done: threading.Event, face_in, face_out):
   t = 0 # milliseconds from start of stream
-  loop = True
-  with open(face_in,'rb') as pipe_face_in, open(face_out,'w') as pipe_face_out:
-    while loop:
-      loop = not done.wait(0.5)
+  with open(face_in,'rb') as pipe_face_in:
+    while not done.wait(0.5):
       # TODO replace dummy affectiva function with proper invocation
 #      emotion = affectiva(pipe_face_in)
 #      if emotion:
-#        pipe_face_out.write('{} {}\n'.format(t, emotion))
+#        with open(face_out,'w') as pipe_face_out:
+#          pipe_face_out.write('{} {}\n'.format(t, emotion))
 #        t += 3000
 
 # predict words with LipNet; supply text to Polly and socket
