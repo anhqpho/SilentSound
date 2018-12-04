@@ -5,9 +5,9 @@ import os, signal, socketserver, sys, threading, time
 _ids = {}
 _lock = threading.Lock()
 _wt = None
-_ff = 'ffmpeg -i {pipe_in} -vf fps="fps=1/3" {pipe_face_in} -r 30 {pipe_lip_in}'
+_ff = 'ffmpeg -i {pipe_in} -vf fps="fps=1/3" pipe:1 >{pipe_face_in} -r 30 pipe:2 >{pipe_lip_in}'
 # NOTE _lp may need to be replaced: 'LipNet/evaluation/predict.py ...'
-_lp = 'LipNet/predict {_wt} {pipe_lip_in} | tee {pipe_txt_out} {pipe_voice_in}'
+_lp = 'LipNet/predict {_wt} {pipe_lip_in} | tee >{pipe_txt_out} >{pipe_voice_in}'
 _addr = ('localhost', 2121)
 _tmp = '/tmp'
 _full_stop = threading.Event() # tell all threads to finish up when set
@@ -117,9 +117,9 @@ def free_fifo(index: int):
 # face_in takes images; lip_in takes streamed mpeg video
 # terminates after input stream closes
 def mpeg_split(video_in, face_in, lip_in):
-  with open(video_in,'rb') as pipe_in, open(face_in,'wb') as pipe_face_in, \
-       open(lip_in,'wb') as pipe_lip_in:
-    os.system(_ff.format(pipe_in, pipe_face_in, pipe_lip_in))
+#  with open(video_in,'rb') as pipe_in, open(face_in,'wb') as pipe_face_in, \
+#       open(lip_in,'wb') as pipe_lip_in:
+  os.system(_ff.format(video_in, face_in, lip_in))
 
 # identify emotions with Affectiva; supply to Polly
 # face_in takes images
