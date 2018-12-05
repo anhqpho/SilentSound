@@ -176,6 +176,7 @@ def voice(voice_in, face_out, voice_out):
         # with open(voice_out,'wb') as pipe_voice_out:
           # write Polly return value to voice_out
         # clear SSML
+    pass
 
 
 if __name__ == '__main__':
