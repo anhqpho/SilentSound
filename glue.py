@@ -45,7 +45,7 @@ class Handler(socketserver.StreamRequestHandler):
     # fifos[5]: face_out
     # fifos[6]: voice_out
     event = threading.Event()
-    split_th = threading.Thread(target=mpeg_split, args=tuple(fifos[0:3]))
+    split_th = threading.Thread(target=mpeg_split, args=tuple(fifos[0:3].insert(0, event)))
     lip_th = threading.Thread(target=lip, args=tuple(fifos[2:5]))
     face_th = threading.Thread(target=emotion, args=(event, fifos[1], fifos[5]))
     voice_th = threading.Thread(target=voice, args=tuple(fifos[4:]))
@@ -116,10 +116,11 @@ def free_fifo(index: int):
 # video_in takes streamed mpeg video
 # face_in takes images; lip_in takes streamed mpeg video
 # terminates after input stream closes
-def mpeg_split(video_in, face_in, lip_in):
+def mpeg_split(done: threading.Event, video_in, face_in, lip_in):
 #  with open(video_in,'rb') as pipe_in, open(face_in,'wb') as pipe_face_in, \
 #       open(lip_in,'wb') as pipe_lip_in:
   os.system(_ff.format(video_in, face_in, lip_in))
+  done.set()
 
 # identify emotions with Affectiva; supply to Polly
 # face_in takes images
@@ -128,13 +129,20 @@ def mpeg_split(video_in, face_in, lip_in):
 def emotion(done: threading.Event, face_in, face_out):
   t = 0 # milliseconds from start of stream
   with open(face_in,'rb') as pipe_face_in:
-    while not done.wait(0.5):
-      # TODO replace dummy affectiva function with proper invocation
-#      emotion = affectiva(pipe_face_in)
-#      if emotion:
-#        with open(face_out,'w') as pipe_face_out:
-#          pipe_face_out.write('{} {}\n'.format(t, emotion))
-#        t += 3000
+    stop = False
+    while not stop:
+      time.sleep(0.5)
+      frame = pipe_face_in.read()
+      stop = done.is_set()
+      if frame:
+        # TODO replace dummy affectiva function with proper invocation
+#        emotion = affectiva(frame)
+        if emotion:
+          with open(face_out,'w') as pipe_face_out:
+            pipe_face_out.write('{} {}\n'.format(t, emotion))
+        t += 3000
+  with open(face_out,'w') as pipe_face_out:
+    pipe_face_out.write('{} <EOF>\n'.format(t))
 
 # predict words with LipNet; supply text to Polly and socket
 # face_in takes streamed mpeg video
@@ -151,20 +159,23 @@ def lip(lip_in, text_out, voice_in):
 # voice_out takes an audio stream
 # terminates after both voice_in and face_out streams close (EOF)
 def voice(voice_in, face_out, voice_out):
-  with open(voice_in,'r') as pipe_voice_in, open(face_out,'r') as pipe_face_out, \
-       open(voice_out,'wb') as pipe_voice_out:
+  ongoing = True
+  with open(voice_in,'r') as pipe_voice_in, open(face_out,'r') as pipe_face_out:
     # TODO read, generate SSML, synthesize voice, write
     # pseudocode:
-    # while voice_in is open or face_out streams is open:
-      # read 1 line at a time from face_out, 3 seconds' worth from voice_in
+    # while face_out stream is open:
+      # wait until read 1 line from face_out
+      # if line from face_out contains EOF:
+        # ongoing = False
+      # read up to 3 seconds' worth from voice_in
       # build SSML (possibly using pyssml)
-      # if SSML is not consumable and voice_in is closed and face_out is closed:
+      # if SSML is not consumable and voice_in is closed and not ongoing:
         # finish chunk
       # if SSML is a consumable chunk:
         # send to Polly
-        # write Polly return value to voice_out
+        # with open(voice_out,'wb') as pipe_voice_out:
+          # write Polly return value to voice_out
         # clear SSML
-    pass
 
 
 if __name__ == '__main__':
@@ -180,6 +191,6 @@ if __name__ == '__main__':
       try:
         time.sleep(3600)
       except KeyboardInterrupt:
-        _full_stop.set()
+        _full_stop.set() # must set to terminate threads
         break
     srv.shutdown()
