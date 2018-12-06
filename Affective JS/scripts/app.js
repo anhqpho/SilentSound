@@ -25,6 +25,14 @@ function log(node_name, msg) {
   $(node_name).append("<span>" + msg + "</span><br />")
 }
 
+function logBig(node_name, msg) {
+  $(node_name).append('<span style="font-size: 36pt;">' + msg + "</span><br />")
+}
+
+function logMed(node_name, msg) {
+  $(node_name).append('<span style="font-size: 20pt;">' + msg + "</span><br />")
+}
+
 //function executes when Start button is pushed.
 function onStart() {
   if (detector && !detector.isRunning) {
@@ -73,21 +81,29 @@ detector.addEventListener("onStopSuccess", function() {
 //Add a callback to receive the results from processing an image.
 //The faces object contains the list of the faces detected in an image.
 //Faces object contains probabilities for all the different expressions, emotions and appearance metrics
+var counter = 0;
+
 detector.addEventListener("onImageResultsSuccess", function(faces, image, timestamp) {
   $('#results').html("");
   log('#results', "Timestamp: " + timestamp.toFixed(2));
   log('#results', "Number of faces found: " + faces.length);
   if (faces.length > 0) {
     log('#results', "Appearance: " + JSON.stringify(faces[0].appearance));
-    log('#results', "Emotions: " + JSON.stringify(faces[0].emotions, function(key, val) {
-      return val.toFixed ? Number(val.toFixed(0)) : val;
-    }));
     log('#results', "Expressions: " + JSON.stringify(faces[0].expressions, function(key, val) {
       return val.toFixed ? Number(val.toFixed(0)) : val;
     }));
-    log('#results', "Emoji: " + faces[0].emojis.dominantEmoji);
+    logMed('#results', "Emotions: " + JSON.stringify(faces[0].emotions, function(key, val) {
+      return val.toFixed ? Number(val.toFixed(0)) : val;
+    }));
+    if (counter == 5) {
+      $('#results1').html("");
+      log('#results1', "Emoji: ");
+      logBig('#results1', "" + faces[0].emojis.dominantEmoji)
+      counter = 0;
+    }
     if($('#face_video_canvas')[0] != null)
            drawFeaturePoints(image, faces[0].featurePoints);
+    counter = counter + 1;
   }
 });
 
@@ -108,4 +124,3 @@ function drawFeaturePoints(img, featurePoints) {
 
   }
 }
-
