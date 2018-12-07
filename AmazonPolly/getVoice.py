@@ -1,8 +1,8 @@
 import boto3
 
 polly_client = boto3.Session(
-                aws_access_key_id="AKIAJNOPNEJHO5MKMZZA",
-    aws_secret_access_key="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",
+                aws_access_key_id="",
+    aws_secret_access_key="",
     region_name='us-west-2').client('polly')
 
 voiceConfig = '<speak><prosody pitch="x-high">set white with b too soon..</prosody></speak>'
